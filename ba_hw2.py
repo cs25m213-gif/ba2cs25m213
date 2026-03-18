@@ -61,13 +61,6 @@ def greedy(bandit, T):
         regret = bandit.best_mean - bandit.means[arm] # regret = optimal mean - obtained mean
         cumulative_regret += regret
         regrets.append(cumulative_regret) # we are storing the cummulative regret and time increases along horizon
-        reward = bandit.pull(arm)
-        arm_count[arm] = 1
-        prob_per_arm[arm] = reward
-        rewards.append(reward)
-        regret = bandit.best_mean - bandit.means[arm] # regret = optimal mean - obtained mean
-        cumulative_regret += regret
-        regrets.append(cumulative_regret) # we are storing the cummulative regret and time increases along horizon
     for t in range(K, T):
         arm = np.argmax(prob_per_arm)
         arm_count[arm] += 1
@@ -109,7 +102,7 @@ def epsilon_greedy(bandit, T, epsilon=0.1):
         else:
             arm = np.argmax(prob_per_arm)
         reward = bandit.pull(arm)
-        prob_per_arm[arm] = (prob_per_arm[arm]*arm_count[arm]+reward)/(arm_count[arm]+1) # updating arms probability
+        prob_per_arm[arm] = ((arm_count[arm]-1)*prob_per_arm[arm] + reward)/arm_count[arm] # updating arms probability
         arm_count[arm] += 1
         rewards.append(reward)
         regret = bandit.best_mean-bandit.means[arm]
@@ -139,7 +132,7 @@ def ucb1(bandit, T):
         arm = np.argmax(ucb_prob_per_arm)
         reward = bandit.pull(arm)
         arm_count[arm] += 1
-        prob_per_arm[arm] = (prob_per_arm[arm]*arm_count[arm]+reward)/(arm_count[arm]+1) # updating arms probability
+        prob_per_arm[arm] = ((arm_count[arm]-1)*prob_per_arm[arm] + reward)/arm_count[arm]  # updating arms probability
         rewards.append(reward)
         regret = bandit.best_mean - bandit.means[arm]
         cumulative_regret += regret
@@ -198,6 +191,24 @@ def run_experiment(means, T, n_runs):
 
     # ── Plot 1: Cumulative Regret Line Chart ──
 
+    plt.clf()
+
+    for name, regret in avg_regrets.items():
+        plt.plot(regret, label=name)
+
+    plt.title("Cumulative Regret vs Time")
+    plt.xlabel("Time Steps")
+    plt.ylabel("Cumulative Regret")
+
+    plot1 = plt.build()
+
+    with open("plot1.txt", "w", encoding="utf-8") as f:
+        f.write(plot1)
+
+    plt.show()
+
+    
+
     # ── Plot 2: Final Average Regret Bar Chart ──
 
 
@@ -206,4 +217,4 @@ if __name__ == "__main__":
     MEANS = [0.1, 0.3, 0.5, 0.6, 0.9]   # 5-armed bandit, best arm = 0.9
     T     = 10000
     RUNS  = 50
-    run_experiment(MEANS, T, n_RUNS)
+    run_experiment(MEANS, T, RUNS)
