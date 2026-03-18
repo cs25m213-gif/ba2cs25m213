@@ -150,12 +150,27 @@ def ucb1(bandit, T):
 # Thompson Sampling
 def thompson_sampling(bandit, T):
 
-    #Initialize algorithm dependent variable here
-    rewards, regrets = [], []
+    K = bandit.K
+    alpha = np.ones(K) # for calculating the success
+    beta = np.ones(K) # for calculating the failures
+    #initialising with one's because initial we have uniform distribution so equal values
+    rewards = []
+    regrets = []
     cumulative_regret = 0
-
     for t in range(T):
-
+        samples = np.random.beta(alpha, beta)
+        arm = np.argmax(samples)
+        reward = bandit.pull(arm)
+        #updating the alpha and beta values accordingly
+        if reward == 1:
+            alpha[arm] += 1
+        else:
+            beta[arm] += 1
+        
+        rewards.append(reward)
+        regret = bandit.best_mean - bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
     return np.array(rewards), np.array(regrets)
 
 # ──────────────────────────────────────────────
