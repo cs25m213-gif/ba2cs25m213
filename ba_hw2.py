@@ -76,15 +76,30 @@ def greedy(bandit, T):
 def epsilon_greedy(bandit, T, epsilon=0.1):
     """Epsilon-greedy: explore uniformly at random with probability epsilon,
     exploit the current best arm otherwise."""
-    K = bandit.K 
+    K = bandit.K
     #Initialize algorithm dependent variable here
+    arm_count = np.zeros(K) #for counting number of times arm is pulled
+    prob_per_arm = np.zeros(K) #for calculating how many times each arm obtained the reward and updating the probabilities accordingly
     rewards, regrets = [], []
     cumulative_regret = 0
 
     # Initialise: pull each arm once
     for arm in range(K):
-
+        reward = bandit.pull(arm)
+        arm_count[arm] = 1
+        prob_per_arm[arm] = reward
+        rewards.append(reward)
+        regret = bandit.best_mean - bandit.means[arm] # regret = optimal mean - obtained mean
+        cumulative_regret += regret
+        regrets.append(cumulative_regret) # we are storing the cummulative regret and time increases along horizon
     for t in range(K, T):
+        arm = np.argmax(prob_per_arm)
+        prob_per_arm[arm] = (prob_per_arm[arm]*arm_count[arm]+reward)/(arm_count[arm]+1) # updating arms probability
+        arm_count[arm] += 1
+        rewards.append(reward)
+        regret = bandit.best_mean-bandit.means[arm]
+        cumulative_regret += regret
+        regrets.append(cumulative_regret)
 
     return np.array(rewards), np.array(regrets)
 
