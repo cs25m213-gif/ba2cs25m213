@@ -104,6 +104,11 @@ def epsilon_greedy(bandit, T, epsilon=0.1):
         regrets.append(cumulative_regret) # we are storing the cummulative regret and time increases along horizon
     for t in range(K, T):
         arm = np.argmax(prob_per_arm)
+        if np.random.rand() < epsilon:
+            arm = np.random.randint(K)
+        else:
+            arm = np.argmax(prob_per_arm)
+        reward = bandit.pull(arm)
         prob_per_arm[arm] = (prob_per_arm[arm]*arm_count[arm]+reward)/(arm_count[arm]+1) # updating arms probability
         arm_count[arm] += 1
         rewards.append(reward)
