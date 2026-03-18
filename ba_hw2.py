@@ -192,7 +192,6 @@ def run_experiment(means, T, n_runs):
     # ── Plot 1: Cumulative Regret Line Chart ──
 
     plt.clf()
-
     for name, regret in avg_regrets.items():
         plt.plot(regret, label=name)
 
@@ -207,10 +206,17 @@ def run_experiment(means, T, n_runs):
 
     plt.show()
 
-    
-
     # ── Plot 2: Final Average Regret Bar Chart ──
 
+    names = list(avg_regrets.keys())
+    final_regret = [regret[-1] for regret in avg_regrets.values()]
+    plt.clf()
+    plt.bar(names, final_regret)
+    plt.title("Average Regret at T = 10000")
+    plot2 = plt.build()
+    with open("plot2.txt", "w",encoding="utf-8") as f:
+        f.write(plot2)
+    plt.show()
 
 if __name__ == "__main__":
     np.random.seed(42)
